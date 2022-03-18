@@ -3,6 +3,8 @@ package ru.involta.composesample3.model
 data class Task(
     val inputType: InputType = InputType.get(InputType.titles.first()),
     val calculationType: CalculationType = CalculationType.get(CalculationType.titles.first()),
+    val conditionType: ConditionType = ConditionType.get(ConditionType.titles.first()),
+    val conditionValue: Int = 3
 ) {
     fun generateCode(): String {
         var code = ""
@@ -23,6 +25,7 @@ data class Task(
                         calculationType.part3
             }
         }
+        code = code.replace("(тут вставить условие)", conditionType.condition.format(conditionValue))
         return code
     }
 }

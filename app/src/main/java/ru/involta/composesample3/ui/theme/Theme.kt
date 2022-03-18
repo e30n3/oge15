@@ -8,14 +8,14 @@ import androidx.compose.runtime.Composable
 import com.google.accompanist.systemuicontroller.rememberSystemUiController
 
 private val DarkColorPalette = darkColors(
-    primary = Purple200,
+    primary = ButtonBottom,
     primaryVariant = Purple700,
     secondary = Teal200,
     background = DarkGray,
 )
 
 private val LightColorPalette = lightColors(
-    primary = Purple500,
+    primary = ButtonBottom,
     primaryVariant = Purple700,
     secondary = Teal200,
     background = WhiteGrey,

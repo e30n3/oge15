@@ -1,7 +1,9 @@
 package ru.involta.composesample3
 
-import android.R.attr.label
-import android.content.ClipData
+import android.R.attr.background
+import android.R.attr.button
+import android.content.Intent
+import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
@@ -10,6 +12,7 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -21,17 +24,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.ClipboardManager
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.getSystemService
+import androidx.core.content.ContextCompat.startActivity
 import ru.involta.composesample3.model.CalculationType
+import ru.involta.composesample3.model.ConditionType
 import ru.involta.composesample3.model.InputType
 import ru.involta.composesample3.model.Task
 import ru.involta.composesample3.ui.theme.ButtonBottom
@@ -68,11 +72,15 @@ fun BodyContent(modifier: Modifier) {
         modifier = modifier
             .verticalScroll(scrollState)
     ) {
-        var task = Task()
+        var task by remember { mutableStateOf(Task()) }
         var code by rememberSaveable { mutableStateOf(task.generateCode()) }
+
+        val clipboard = LocalClipboardManager.current
+        val context = LocalContext.current
+
         Spacer(modifier = Modifier.height(12.dp))
         Header("ОГЭ 15.2")
-        DataCard("Данные задачи", modifier = Modifier.padding(horizontal = 12.dp)) {
+        DataCard("Шаблон задачи", modifier = Modifier.padding(horizontal = 12.dp)) {
             ExpandableMenu("Тип ввода данных", elements = InputType.titles,
                 onSelect = {
                     task = task.copy(inputType = InputType.get(it))
@@ -86,20 +94,24 @@ fun BodyContent(modifier: Modifier) {
                     code = task.generateCode()
                 }
             )
-            Spacer(modifier = Modifier.height(20.dp))
+        }
+        Spacer(modifier = Modifier.height(20.dp))
+        DataCard("Условие", Modifier.padding(horizontal = 12.dp)) {
+            ExpandableMenu("Тип условия", elements = ConditionType.titles,
+                onSelect = {
+                    task = task.copy(conditionType = ConditionType.get(it))
+                    code = task.generateCode()
+                }
+            )
+            if (task.conditionType.needEditText) {
+                Spacer(modifier = Modifier.height(16.dp))
+                EditText("Значение условия") {
+                    task = task.copy(conditionValue = it.toIntOrNull() ?: 0)
+                    code = task.generateCode()
+                }
+            }
 
         }
-
-
-        /*    Column(Modifier.animateContentSize()) {
-                if (code.isNotEmpty() and code.isNotBlank()) {
-                    Text(code)
-                    Spacer(modifier = Modifier.height(20.dp))
-                }
-            }*/
-
-        val clipboard = LocalClipboardManager.current
-        val context = LocalContext.current
         Spacer(modifier = Modifier.height(20.dp))
         DataCard("Код задачи", Modifier.padding(horizontal = 12.dp)) {
             SelectionContainer {
@@ -107,7 +119,7 @@ fun BodyContent(modifier: Modifier) {
                     code,
                     modifier = Modifier.animateContentSize(),
                     fontFamily = FontFamily.Monospace,
-                    fontSize = 12.sp
+                    fontSize = 14.sp
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -116,16 +128,34 @@ fun BodyContent(modifier: Modifier) {
                 Toast.makeText(context, "Скопировано!", Toast.LENGTH_SHORT).show()
             }
         }
-
-
-
         Spacer(modifier = Modifier.height(20.dp))
         DataCard("Дополнительно", modifier = Modifier.padding(horizontal = 12.dp)) {
-            AccentButton("") {
-
+            AccentButton("Python online") {
+                val viewIntent = Intent(
+                    "android.intent.action.VIEW",
+                    Uri.parse("https://www.onlinegdb.com/online_python_compiler")
+                )
+                context.startActivity(viewIntent)
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+            AccentButton("Python android") {
+                val viewIntent = Intent(
+                    "android.intent.action.VIEW",
+                    Uri.parse("https://drive.google.com/file/d/1I_Y496CS_YBdqZa0BkEPoKYWJmcrO3vk/view")
+                )
+                context.startActivity(viewIntent)
             }
         }
-        Spacer(modifier = Modifier.height(12.dp))
+        Text(
+            text = "Иван Зайцев, 2022",
+            textAlign = TextAlign.Center,
+            modifier = Modifier
+                .padding(vertical = 8.dp)
+                .fillMaxWidth(),
+            color = Color.Gray,
+            fontSize = 10.sp
+        )
+
     }
 }
 
@@ -205,6 +235,35 @@ fun DataCard(
         }
     }
 }
+
+@Composable
+fun EditText(editTextName: String, onValueChange: (newString: String) -> Unit) {
+    var text by rememberSaveable { mutableStateOf("3") }
+
+    Text(text = editTextName, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
+    TextField(
+        colors = TextFieldDefaults.textFieldColors(
+            textColor = Color.Black,
+            disabledTextColor = Color.Transparent,
+            backgroundColor = Color.White,
+            focusedIndicatorColor = Color.Transparent,
+            unfocusedIndicatorColor = Color.Transparent,
+            disabledIndicatorColor = Color.Transparent
+        ),
+        shape = RoundedCornerShape(5.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .border(width = 2.dp, shape = RoundedCornerShape(5.dp), color = Color.LightGray),
+        value = text,
+        onValueChange = { newString ->
+            text = newString.filter { it.isDigit() }
+            onValueChange(newString)
+        },
+        keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Number)
+
+    )
+}
+
 
 @Composable
 fun ExpandableMenu(
