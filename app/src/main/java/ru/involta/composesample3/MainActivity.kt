@@ -10,6 +10,7 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardOptions
@@ -24,8 +25,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalClipboardManager
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.input.KeyboardType
@@ -68,15 +71,23 @@ fun MyApp() {
 @Composable
 fun BodyContent(modifier: Modifier) {
     val scrollState = rememberScrollState()
+
+    val clipboard = LocalClipboardManager.current
+    val context = LocalContext.current
+    val focusManager = LocalFocusManager.current
     Column(
         modifier = modifier
             .verticalScroll(scrollState)
+            .pointerInput(Unit) {
+                detectTapGestures(onTap = {
+                    focusManager.clearFocus()
+                })
+            }
     ) {
         var task by remember { mutableStateOf(Task()) }
         var code by rememberSaveable { mutableStateOf(task.generateCode()) }
 
-        val clipboard = LocalClipboardManager.current
-        val context = LocalContext.current
+
 
         Spacer(modifier = Modifier.height(12.dp))
         Header("ОГЭ 15.2")
@@ -105,7 +116,7 @@ fun BodyContent(modifier: Modifier) {
             )
             if (task.conditionType.needEditText) {
                 Spacer(modifier = Modifier.height(16.dp))
-                EditText("Значение условия") {
+                EditText("Значение условия", task.conditionValue.toString()) {
                     task = task.copy(conditionValue = it.toIntOrNull() ?: 0)
                     code = task.generateCode()
                 }
@@ -237,8 +248,12 @@ fun DataCard(
 }
 
 @Composable
-fun EditText(editTextName: String, onValueChange: (newString: String) -> Unit) {
-    var text by rememberSaveable { mutableStateOf("3") }
+fun EditText(
+    editTextName: String,
+    editTextValue: String = "3",
+    onValueChange: (newString: String) -> Unit
+) {
+    var text by rememberSaveable { mutableStateOf(editTextValue) }
 
     Text(text = editTextName, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
     TextField(
