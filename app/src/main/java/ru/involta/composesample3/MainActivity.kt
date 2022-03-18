@@ -6,6 +6,7 @@ import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
 import androidx.compose.foundation.gestures.detectTapGestures
@@ -62,6 +63,9 @@ fun MyApp() {
         BodyContent(Modifier.padding())
     }
 }
+
+
+
 
 @Composable
 fun BodyContent(modifier: Modifier) {
@@ -121,30 +125,33 @@ fun BodyContent(modifier: Modifier) {
                 task = task.copy(conditionOperationType = LogicOperationType.get(it))
                 code = task.generateCode()
             }
-            if (task.conditionOperationType != LogicOperationType.DISABLE) {
-                Spacer(
-                    modifier = Modifier
-                        .height(16.dp)
-                )
-                ExpandableMenu(
-                    menuName = "Тип условия", elements = ConditionType.titles,
-                    onSelect = {
-                        task = task.copy(conditionType2 = ConditionType.get(it))
-                        code = task.generateCode()
-                    },
-                    modifier = Modifier
-                )
-                if (task.conditionType.needEditText) {
-                    Spacer(modifier = Modifier.height(16.dp))
-                    EditText(
-                        "Значение условия",
-                        editTextValue = task.conditionValue.toString(),
-                        modifier = Modifier.animateContentSize()
-                    ) {
-                        task = task.copy(conditionValue2 = it.toIntOrNull() ?: 0)
-                        code = task.generateCode()
+            AnimatedVisibility(task.conditionOperationType != LogicOperationType.DISABLE) {
+                Column {
+                    Spacer(
+                        modifier = Modifier
+                            .height(16.dp)
+                    )
+                    ExpandableMenu(
+                        menuName = "Тип условия", elements = ConditionType.titles,
+                        onSelect = {
+                            task = (task.copy(conditionType2 = ConditionType.get(it)))
+                            code = task.generateCode()
+                        },
+                        modifier = Modifier
+                    )
+                    if (task.conditionType.needEditText) {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        EditText(
+                            "Значение условия",
+                            editTextValue = task.conditionValue.toString(),
+                            modifier = Modifier.animateContentSize()
+                        ) {
+                            task = (task.copy(conditionValue2 = it.toIntOrNull() ?: 0))
+                            code = task.generateCode()
+                        }
                     }
                 }
+
             }
 
         }

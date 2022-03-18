@@ -41,13 +41,31 @@ data class Task(
             code.replace("(тут вставить условие)", summaryCondition)
         return code
     }
-}
 
-fun main() {
-    print(
-        Task(
-            InputType.FIRST_NUMBER_IS_COUNT,
-            CalculationType.MAX
-        ).generateCode()
-    )
+    companion object {
+        fun pack(task: Task): String = task.run {
+            inputType.title +"#"+
+                    calculationType.title +"#"+
+                    conditionType.title +"#"+
+                    conditionValue.toString() +"#"+
+                    conditionOperationType.title +"#"+
+                    conditionType2 +"#"+
+                    conditionValue2
+        }
+
+
+        fun unpack(packed: String): Task {
+            var i = 0
+            val data = packed.split("#")
+            return Task(
+                inputType = InputType.get(data[i++]),
+                calculationType = CalculationType.get(data[i++]),
+                conditionType = ConditionType.get(data[i++]),
+                conditionValue = data[i++].toInt(),
+                conditionOperationType = LogicOperationType.get(data[i++]),
+                conditionType2 = ConditionType.get(data[i++]),
+                conditionValue2 = data[i].toInt()
+            )
+        }
+    }
 }
