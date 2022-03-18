@@ -87,14 +87,14 @@ fun BodyContent(modifier: Modifier) {
         Spacer(modifier = Modifier.height(12.dp))
         Header("ОГЭ 15.2")
         DataCard("Шаблон задачи", modifier = Modifier.padding(horizontal = 12.dp)) {
-            ExpandableMenu("Тип ввода данных", elements = InputType.titles,
+            ExpandableMenu(menuName = "Тип ввода данных", elements = InputType.titles,
                 onSelect = {
                     task = task.copy(inputType = InputType.get(it))
                     code = task.generateCode()
                 }
             )
             Spacer(modifier = Modifier.height(20.dp))
-            ExpandableMenu("Тип искомого значения", elements = CalculationType.titles,
+            ExpandableMenu(menuName = "Тип искомого значения", elements = CalculationType.titles,
                 onSelect = {
                     task = task.copy(calculationType = CalculationType.get(it))
                     code = task.generateCode()
@@ -103,7 +103,7 @@ fun BodyContent(modifier: Modifier) {
         }
         Spacer(modifier = Modifier.height(20.dp))
         DataCard("Условие", Modifier.padding(horizontal = 12.dp)) {
-            ExpandableMenu("Тип условия", elements = ConditionType.titles,
+            ExpandableMenu(menuName = "Тип условия", elements = ConditionType.titles,
                 onSelect = {
                     task = task.copy(conditionType = ConditionType.get(it))
                     code = task.generateCode()
@@ -111,14 +111,40 @@ fun BodyContent(modifier: Modifier) {
             )
             if (task.conditionType.needEditText) {
                 Spacer(modifier = Modifier.height(16.dp))
-                EditText("Значение условия", task.conditionValue.toString()) {
+                EditText("Значение условия", editTextValue = task.conditionValue.toString()) {
                     task = task.copy(conditionValue = it.toIntOrNull() ?: 0)
                     code = task.generateCode()
                 }
             }
             Spacer(modifier = Modifier.height(16.dp))
             RadioButtonMenu("Логическая операция между условиями", LogicOperationType.titles) {
-
+                task = task.copy(conditionOperationType = LogicOperationType.get(it))
+                code = task.generateCode()
+            }
+            if (task.conditionOperationType != LogicOperationType.DISABLE) {
+                Spacer(
+                    modifier = Modifier
+                        .height(16.dp)
+                )
+                ExpandableMenu(
+                    menuName = "Тип условия", elements = ConditionType.titles,
+                    onSelect = {
+                        task = task.copy(conditionType2 = ConditionType.get(it))
+                        code = task.generateCode()
+                    },
+                    modifier = Modifier
+                )
+                if (task.conditionType.needEditText) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                    EditText(
+                        "Значение условия",
+                        editTextValue = task.conditionValue.toString(),
+                        modifier = Modifier.animateContentSize()
+                    ) {
+                        task = task.copy(conditionValue2 = it.toIntOrNull() ?: 0)
+                        code = task.generateCode()
+                    }
+                }
             }
 
         }
@@ -129,7 +155,7 @@ fun BodyContent(modifier: Modifier) {
                     code,
                     modifier = Modifier.animateContentSize(),
                     fontFamily = FontFamily.Monospace,
-                    fontSize = 14.sp
+                    fontSize = 10.sp
                 )
             }
             Spacer(modifier = Modifier.height(12.dp))
@@ -188,7 +214,7 @@ fun BodyContent(modifier: Modifier) {
 }
 
 @Composable
-fun RadioButtonMenu(menuName: String, elements: List<String>, onChange: (Int) -> Unit) {
+fun RadioButtonMenu(menuName: String, elements: List<String>, onChange: (String) -> Unit) {
     @Composable
     fun RadioButtonMenuElement(
         title: String,
@@ -229,7 +255,7 @@ fun RadioButtonMenu(menuName: String, elements: List<String>, onChange: (Int) ->
                         .weight(1f)
                         .clickable {
                             selectedElement = it
-                            onChange(i)
+                            onChange(it)
                         },
                 )
                 if (i != elements.lastIndex) Spacer(modifier = Modifier.width(4.dp))
@@ -319,6 +345,7 @@ fun DataCard(
 @Composable
 fun EditText(
     editTextName: String,
+    modifier: Modifier = Modifier,
     editTextValue: String = "3",
     onValueChange: (newString: String) -> Unit
 ) {
@@ -351,6 +378,7 @@ fun EditText(
 
 @Composable
 fun ExpandableMenu(
+    modifier: Modifier = Modifier,
     menuName: String = "",
     elements: List<String> = listOf("a", "b", "c", "d"),
     onSelect: (String) -> Unit = {},

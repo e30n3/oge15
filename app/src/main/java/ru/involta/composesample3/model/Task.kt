@@ -4,7 +4,10 @@ data class Task(
     val inputType: InputType = InputType.get(InputType.titles.first()),
     val calculationType: CalculationType = CalculationType.get(CalculationType.titles.first()),
     val conditionType: ConditionType = ConditionType.get(ConditionType.titles.first()),
-    val conditionValue: Int = 3
+    val conditionValue: Int = 3,
+    val conditionOperationType: LogicOperationType = LogicOperationType.get(LogicOperationType.titles.first()),
+    val conditionType2: ConditionType = ConditionType.get(ConditionType.titles.first()),
+    val conditionValue2: Int = 3,
 ) {
     fun generateCode(): String {
         var code = ""
@@ -25,7 +28,17 @@ data class Task(
                         calculationType.part3
             }
         }
-        code = code.replace("(тут вставить условие)", conditionType.condition.format(conditionValue))
+
+        val summaryCondition = if (conditionOperationType == LogicOperationType.DISABLE)
+            conditionType.condition.format(conditionValue)
+        else
+            conditionType.condition.format(conditionValue) + " " +
+                    conditionOperationType.sign + " " +
+                    conditionType2.condition.format(conditionValue2)
+
+
+        code =
+            code.replace("(тут вставить условие)", summaryCondition)
         return code
     }
 }
