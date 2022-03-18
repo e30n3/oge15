@@ -1,8 +1,7 @@
 package ru.involta.composesample3
 
-import android.R.attr.background
-import android.R.attr.button
 import android.content.Intent
+import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
@@ -37,6 +36,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.content.ContextCompat.startActivity
+import androidx.core.content.FileProvider
 import ru.involta.composesample3.model.CalculationType
 import ru.involta.composesample3.model.ConditionType
 import ru.involta.composesample3.model.InputType
@@ -158,13 +158,31 @@ fun BodyContent(modifier: Modifier) {
             }
         }
         Text(
-            text = "Иван Зайцев, 2022",
+            text = "Иван Зайцев, e30n3z@gmail.com",
             textAlign = TextAlign.Center,
             modifier = Modifier
+                .clickable {
+                    val emailSelectorIntent = Intent(Intent.ACTION_SENDTO)
+                    emailSelectorIntent.data = Uri.parse("mailto:")
+
+                    val emailIntent = Intent(Intent.ACTION_SEND)
+                    emailIntent.putExtra(Intent.EXTRA_EMAIL, arrayOf("e30n3z@gmail.com"))
+                    emailIntent.putExtra(Intent.EXTRA_SUBJECT, "Из приложения ОГЭ 15.2")
+                    emailIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                    emailIntent.addFlags(Intent.FLAG_GRANT_WRITE_URI_PERMISSION)
+                    emailIntent.selector = emailSelectorIntent
+
+
+                    /*if (emailIntent.resolveActivity(context.packageManager) != null)*/
+                    context.startActivity(
+                        emailIntent
+                    )
+                }
                 .padding(vertical = 8.dp)
                 .fillMaxWidth(),
             color = Color.Gray,
             fontSize = 10.sp
+
         )
 
     }
