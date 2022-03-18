@@ -40,7 +40,7 @@ enum class CalculationType(
         "Минимальное из чисел",
 
         "result = 99999999\n",
-        "if (тут вставить условие):\n" +
+        "\tif (тут вставить условие):\n" +
                 "\t\tif new_number < result:\n" +
                 "\t\t\tresult = new_number\n",
         "print(result)\n"
@@ -48,7 +48,7 @@ enum class CalculationType(
 
 
     companion object {
-        fun get(title: String) = CalculationType.values().find { it.title == title }?: SUM
-        val titles get() = CalculationType.values().map { it.title }
+        fun get(title: String) = values().find { it.title == title }?: SUM
+        val titles get() = values().map { it.title }
     }
 }

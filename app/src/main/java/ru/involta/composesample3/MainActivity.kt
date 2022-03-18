@@ -1,7 +1,6 @@
 package ru.involta.composesample3
 
 import android.content.Intent
-import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.widget.Toast
@@ -22,6 +21,7 @@ import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.focus.focusModifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
@@ -35,12 +35,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.core.content.ContextCompat.startActivity
-import androidx.core.content.FileProvider
-import ru.involta.composesample3.model.CalculationType
-import ru.involta.composesample3.model.ConditionType
-import ru.involta.composesample3.model.InputType
-import ru.involta.composesample3.model.Task
+import ru.involta.composesample3.model.*
 import ru.involta.composesample3.ui.theme.ButtonBottom
 import ru.involta.composesample3.ui.theme.ButtonTop
 import ru.involta.composesample3.ui.theme.ComposeSample3Theme
@@ -121,6 +116,10 @@ fun BodyContent(modifier: Modifier) {
                     code = task.generateCode()
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
+            RadioButtonMenu("Логическая операция между условиями", LogicOperationType.titles) {
+
+            }
 
         }
         Spacer(modifier = Modifier.height(20.dp))
@@ -186,6 +185,58 @@ fun BodyContent(modifier: Modifier) {
         )
 
     }
+}
+
+@Composable
+fun RadioButtonMenu(menuName: String, elements: List<String>, onChange: (Int) -> Unit) {
+    @Composable
+    fun RadioButtonMenuElement(
+        title: String,
+        isSelected: Boolean = false,
+        modifier: Modifier = Modifier,
+
+        ) {
+        Row(
+            modifier
+                .background(
+                    if (isSelected) Brush.verticalGradient(listOf(ButtonTop, ButtonBottom))
+                    else Brush.verticalGradient(listOf(Color.White, Color.White)),
+                    shape = RoundedCornerShape(5.dp),
+                )
+                .border(
+                    width = 2.dp,
+                    shape = RoundedCornerShape(5.dp),
+                    color = Color.LightGray
+                ),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            Text(text = title, Modifier.padding(18.dp))
+        }
+    }
+
+    Column(Modifier.fillMaxWidth()) {
+        Text(text = menuName, fontSize = 12.sp, modifier = Modifier.padding(bottom = 4.dp))
+        var selectedElement by rememberSaveable { mutableStateOf(elements.first()) }
+        Row(
+            Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.Center
+        ) {
+            elements.forEachIndexed { i, it ->
+                RadioButtonMenuElement(
+                    title = it,
+                    it == selectedElement,
+                    Modifier
+                        .weight(1f)
+                        .clickable {
+                            selectedElement = it
+                            onChange(i)
+                        },
+                )
+                if (i != elements.lastIndex) Spacer(modifier = Modifier.width(4.dp))
+            }
+        }
+    }
+
 }
 
 @Composable
