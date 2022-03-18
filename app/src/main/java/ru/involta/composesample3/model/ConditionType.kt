@@ -1,10 +1,14 @@
 package ru.involta.composesample3.model
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
+
 enum class ConditionType(
     val title: String,
     val condition: String,
     val needEditText: Boolean = true
-) {
+)  {
     ALIQUOT("Кратность", "(new_number %% %d == 0)"),
     NOT_ALIQUOT("Некратность", "(new_number %% %d != 0)"),
     LAST_DIGIT("Последняя цифра числа", "(new_number %% 10 == %d)"),

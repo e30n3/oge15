@@ -1,11 +1,15 @@
 package ru.involta.composesample3.model
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
+
 enum class CalculationType(
     val title: String,
     val part1: String,
     val part2: String,
     val part3: String
-) {
+)  {
     SUM(
         "Сумма чисел",
         "result = 0\n",
@@ -48,7 +52,7 @@ enum class CalculationType(
 
 
     companion object {
-        fun get(title: String) = values().find { it.title == title }?: SUM
+        fun get(title: String) = values().find { it.title == title } ?: SUM
         val titles get() = values().map { it.title }
     }
 }

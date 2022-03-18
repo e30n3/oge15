@@ -1,5 +1,9 @@
 package ru.involta.composesample3.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class Task(
     val inputType: InputType = InputType.get(InputType.titles.first()),
     val calculationType: CalculationType = CalculationType.get(CalculationType.titles.first()),
@@ -8,7 +12,7 @@ data class Task(
     val conditionOperationType: LogicOperationType = LogicOperationType.get(LogicOperationType.titles.first()),
     val conditionType2: ConditionType = ConditionType.get(ConditionType.titles.first()),
     val conditionValue2: Int = 3,
-) {
+) : Parcelable {
     fun generateCode(): String {
         var code = ""
         when (inputType) {
@@ -43,13 +47,15 @@ data class Task(
     }
 
     companion object {
+
+
         fun pack(task: Task): String = task.run {
-            inputType.title +"#"+
-                    calculationType.title +"#"+
-                    conditionType.title +"#"+
-                    conditionValue.toString() +"#"+
-                    conditionOperationType.title +"#"+
-                    conditionType2 +"#"+
+            inputType.title + "#" +
+                    calculationType.title + "#" +
+                    conditionType.title + "#" +
+                    conditionValue.toString() + "#" +
+                    conditionOperationType.title + "#" +
+                    conditionType2 + "#" +
                     conditionValue2
         }
 

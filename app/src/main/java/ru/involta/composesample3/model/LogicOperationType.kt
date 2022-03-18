@@ -1,5 +1,8 @@
 package ru.involta.composesample3.model
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
+
 enum class LogicOperationType(val title: String, val sign: String) {
     DISABLE("Нет", ""),
     AND("И", "and"),

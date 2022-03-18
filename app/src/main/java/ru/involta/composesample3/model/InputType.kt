@@ -1,13 +1,16 @@
 package ru.involta.composesample3.model
 
+import android.os.Parcelable
+import kotlinx.android.parcel.Parcelize
 import java.lang.reflect.Type
+
 
 enum class InputType(
     val title: String,
     val part1: String,
     val part2: String,
     val part3: String = ""
-) {
+)  {
     FIRST_NUMBER_IS_COUNT(
         "Ввод количества чисел",
         "numbers_count = int(input())\n",
@@ -22,7 +25,9 @@ enum class InputType(
     );
 
     companion object {
-        fun get(title: String) = InputType.values().find { it.title == title } ?: FIRST_NUMBER_IS_COUNT
+        fun get(title: String) =
+            InputType.values().find { it.title == title } ?: FIRST_NUMBER_IS_COUNT
+
         val titles get() = InputType.values().map { it.title }
     }
 }

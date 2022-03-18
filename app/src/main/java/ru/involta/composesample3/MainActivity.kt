@@ -19,6 +19,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.mapSaver
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -65,8 +66,6 @@ fun MyApp() {
 }
 
 
-
-
 @Composable
 fun BodyContent(modifier: Modifier) {
     val scrollState = rememberScrollState()
@@ -83,7 +82,7 @@ fun BodyContent(modifier: Modifier) {
                 })
             }
     ) {
-        var task by remember { mutableStateOf(Task()) }
+        var task by rememberSaveable { mutableStateOf(Task()) }
         var code by rememberSaveable { mutableStateOf(task.generateCode()) }
 
 
@@ -123,6 +122,8 @@ fun BodyContent(modifier: Modifier) {
             Spacer(modifier = Modifier.height(16.dp))
             RadioButtonMenu("Логическая операция между условиями", LogicOperationType.titles) {
                 task = task.copy(conditionOperationType = LogicOperationType.get(it))
+                if (LogicOperationType.get(it)== LogicOperationType.DISABLE)
+                    task = task.copy(conditionType2 = ConditionType.ALIQUOT, conditionValue2 = 3)
                 code = task.generateCode()
             }
             AnimatedVisibility(task.conditionOperationType != LogicOperationType.DISABLE) {
@@ -139,7 +140,7 @@ fun BodyContent(modifier: Modifier) {
                         },
                         modifier = Modifier
                     )
-                    if (task.conditionType.needEditText) {
+                    if (task.conditionType2.needEditText) {
                         Spacer(modifier = Modifier.height(16.dp))
                         EditText(
                             "Значение условия",
@@ -233,7 +234,7 @@ fun RadioButtonMenu(menuName: String, elements: List<String>, onChange: (String)
             modifier
                 .background(
                     if (isSelected) Brush.verticalGradient(listOf(ButtonTop, ButtonBottom))
-                    else Brush.verticalGradient(listOf(Color.White, Color.White)),
+                    else Brush.verticalGradient(listOf(Color.Transparent, Color.Transparent)),
                     shape = RoundedCornerShape(5.dp),
                 )
                 .border(
@@ -363,7 +364,7 @@ fun EditText(
         colors = TextFieldDefaults.textFieldColors(
             textColor = Color.Black,
             disabledTextColor = Color.Transparent,
-            backgroundColor = Color.White,
+            backgroundColor =  Color.Transparent,
             focusedIndicatorColor = Color.Transparent,
             unfocusedIndicatorColor = Color.Transparent,
             disabledIndicatorColor = Color.Transparent
