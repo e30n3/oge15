@@ -1,14 +1,16 @@
 package ru.involta.composesample3
 
+import android.R.attr.label
+import android.content.ClipData
 import android.os.Bundle
 import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.animateContentSize
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ExpandLess
@@ -19,15 +21,23 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.platform.ClipboardManager
+import androidx.compose.ui.platform.LocalClipboardManager
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.core.content.ContextCompat.getSystemService
+import ru.involta.composesample3.model.CalculationType
+import ru.involta.composesample3.model.InputType
+import ru.involta.composesample3.model.Task
 import ru.involta.composesample3.ui.theme.ButtonBottom
 import ru.involta.composesample3.ui.theme.ButtonTop
 import ru.involta.composesample3.ui.theme.ComposeSample3Theme
+
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -47,36 +57,88 @@ fun MyApp() {
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colors.background
     ) {
-        BodyContent(Modifier.padding(horizontal = 12.dp))
+        BodyContent(Modifier.padding())
     }
 }
 
 @Composable
 fun BodyContent(modifier: Modifier) {
     val scrollState = rememberScrollState()
-    Column(modifier = modifier.verticalScroll(scrollState)) {
+    Column(
+        modifier = modifier
+            .verticalScroll(scrollState)
+    ) {
+        var task = Task()
+        var code by rememberSaveable { mutableStateOf(task.generateCode()) }
         Spacer(modifier = Modifier.height(12.dp))
-        Header("Регистрация")
-        DataCard("Тип пользователя") {
-            ExpandableMenu("Тип профиля")
+        Header("ОГЭ 15.2")
+        DataCard("Данные задачи", modifier = Modifier.padding(horizontal = 12.dp)) {
+            ExpandableMenu("Тип ввода данных", elements = InputType.titles,
+                onSelect = {
+                    task = task.copy(inputType = InputType.get(it))
+                    code = task.generateCode()
+                }
+            )
             Spacer(modifier = Modifier.height(20.dp))
-            AccentButton("Сделать")
+            ExpandableMenu("Тип искомого значения", elements = CalculationType.titles,
+                onSelect = {
+                    task = task.copy(calculationType = CalculationType.get(it))
+                    code = task.generateCode()
+                }
+            )
+            Spacer(modifier = Modifier.height(20.dp))
+
         }
+
+
+        /*    Column(Modifier.animateContentSize()) {
+                if (code.isNotEmpty() and code.isNotBlank()) {
+                    Text(code)
+                    Spacer(modifier = Modifier.height(20.dp))
+                }
+            }*/
+
+        val clipboard = LocalClipboardManager.current
+        val context = LocalContext.current
         Spacer(modifier = Modifier.height(20.dp))
-        DataCard("Персональные данные") {
-            Text("How are you")
+        DataCard("Код задачи", Modifier.padding(horizontal = 12.dp)) {
+            SelectionContainer {
+                Text(
+                    code,
+                    modifier = Modifier.animateContentSize(),
+                    fontFamily = FontFamily.Monospace,
+                    fontSize = 12.sp
+                )
+            }
+            Spacer(modifier = Modifier.height(12.dp))
+            AccentButton("Скопировать") {
+                clipboard.setText(AnnotatedString(code))
+                Toast.makeText(context, "Скопировано!", Toast.LENGTH_SHORT).show()
+            }
+        }
+
+
+
+        Spacer(modifier = Modifier.height(20.dp))
+        DataCard("Дополнительно", modifier = Modifier.padding(horizontal = 12.dp)) {
+            AccentButton("") {
+
+            }
         }
         Spacer(modifier = Modifier.height(12.dp))
     }
 }
 
 @Composable
-fun AccentButton(text: String) {
+fun AccentButton(text: String, onClick: () -> Unit) {
     GradientButton(
         text = text,
         gradient = Brush.verticalGradient(listOf(ButtonTop, ButtonBottom)),
         textColor = Color.Black,
-        modifier = Modifier.fillMaxWidth().height(54.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(54.dp),
+        onClick = onClick
     )
 }
 
@@ -121,10 +183,15 @@ fun Header(topicName: String) {
 }
 
 @Composable
-fun DataCard(cardName: String = "", content: @Composable ColumnScope.() -> Unit) {
+fun DataCard(
+    cardName: String = "",
+    modifier: Modifier = Modifier,
+    content: @Composable ColumnScope.() -> Unit
+) {
     Card(
-        Modifier
-            .fillMaxWidth(), elevation = 24.dp
+        modifier
+            .fillMaxWidth(),
+        elevation = 24.dp,
     ) {
         Column(Modifier.padding(20.dp)) {
             if (cardName.isNotBlank() and cardName.isNotEmpty()) {
@@ -142,12 +209,11 @@ fun DataCard(cardName: String = "", content: @Composable ColumnScope.() -> Unit)
 @Composable
 fun ExpandableMenu(
     menuName: String = "",
-    hint: String = "Выберите из списка",
     elements: List<String> = listOf("a", "b", "c", "d"),
     onSelect: (String) -> Unit = {},
 ) {
     var expanded by rememberSaveable { mutableStateOf(false) }
-    var selected by rememberSaveable { mutableStateOf(hint) }
+    var selected by rememberSaveable { mutableStateOf(elements.first()) }
 
 
     @Composable
